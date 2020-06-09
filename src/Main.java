@@ -1,130 +1,91 @@
 import java.sql.*;
 
 public class Main {
-    public static void main( String args[] ) {
-        Connection c = null;
-        Statement stmt = null;
+    static Connection c = null;
+    static Statement st = null;
 
-        try {
+    public static void main( String args[] ) throws Exception {
             Class.forName("org.sqlite.JDBC");
-            c = DriverManager.getConnection("jdbc:sqlite:agenda.db");
+            c = DriverManager.getConnection("jdbc:sqlite:E:/SQLite Databases/agenda.sqlite");
             System.out.println("Opened database successfully");
 
-
-            /* TABLES */
-
-            stmt = c.createStatement();
-
-            String sql = "DROP TABLE CONTACTOS";
-            stmt.executeUpdate(sql);
-
-            sql = "DROP TABLE EMAILS";
-            stmt.executeUpdate(sql);
-
-            sql = "DROP TABLE TELEFONOS";
-            stmt.executeUpdate(sql);
-
-            sql = "CREATE TABLE CONTACTOS " +
-                    "(DNI VARCHAR(20) PRIMARY KEY NOT NULL," +
-                    " NOMBRE VARCHAR(30) NOT NULL, " +
-                    " DIRECCION VARCHAR(30) NOT NULL)";
-            stmt.executeUpdate(sql);
-
-            sql = "CREATE TABLE EMAILS " +
-                    "(DNI VARCHAR(20) NOT NULL," +
-                    " EMAIL VARCHAR(50) NOT NULL, " +
-                    " FOREIGN KEY(DNI) REFERENCES CONTACTOS (DNI) ON UPDATE CASCADE ON DELETE CASCADE)";
-            stmt.executeUpdate(sql);
-
-            sql = "CREATE TABLE TELEFONOS " +
-                    "(DNI VARCHAR(20) NOT NULL," +
-                    " TELEFONO INT NOT NULL, " +
-                    " FOREIGN KEY(DNI) REFERENCES CONTACTOS (DNI) ON UPDATE CASCADE ON DELETE CASCADE)";
-            stmt.executeUpdate(sql);
-
+            // TABLES
+            createTables();
 
             /* INSERTS */
+            insertData();
 
-            sql = "INSERT INTO CONTACTOS " +
-                    "VALUES ('48584159A', 'Messi', 'Barcelona');";
-            stmt.executeUpdate(sql);
+            // SELECTS
 
-            sql = "INSERT INTO CONTACTOS " +
-                    "VALUES ('12345678W', 'Jero', 'Mallorca');";
-            stmt.executeUpdate(sql);
+            // GENERAL
 
-            sql = "INSERT INTO CONTACTOS " +
-                    "VALUES ('87654321Q', 'Juan Francisco', 'Mallorca');";
-            stmt.executeUpdate(sql);
+            selectAll();
 
-            sql = "INSERT INTO EMAILS " +
-                    "VALUES ('48584159A', 'messi@gmail.com');";
-            stmt.executeUpdate(sql);
+            // CONCRET
 
-            sql = "INSERT INTO EMAILS " +
-                    "VALUES ('12345678W', 'jero13@gmail.com');";
-            stmt.executeUpdate(sql);
-
-            sql = "INSERT INTO EMAILS " +
-                    "VALUES ('87654321Q', 'jfpinanm@gmail.com');";
-            stmt.executeUpdate(sql);
-
-            sql = "INSERT INTO TELEFONOS " +
-                    "VALUES ('48584159A', 971020201);";
-            stmt.executeUpdate(sql);
-
-            sql = "INSERT INTO TELEFONOS " +
-                    "VALUES ('48584159A', 659010203);";
-            stmt.executeUpdate(sql);
-
-            sql = "INSERT INTO TELEFONOS " +
-                    "VALUES ('12345678W', 659040401);";
-            stmt.executeUpdate(sql);
-
-            sql = "INSERT INTO TELEFONOS " +
-                    "VALUES ('87654321Q', 671020406);";
-            stmt.executeUpdate(sql);
-
-
-            /* SELECTS */
-
-            ResultSet rs = stmt.executeQuery( "SELECT * FROM CONTACTOS C, EMAILS E, TELEFONOS T WHERE C.DNI = E.DNI AND C.DNI = T.DNI ORDER BY C.DNI DESC;" );
-
-            String lastDNI = "";
-
-            while (rs.next()) {
-                String dni = rs.getString("DNI");
-                if (!lastDNI.equals(dni)) {
-                    String name = rs.getString("NOMBRE");
-                    String dir = rs.getString("DIRECCION");
-                    String email = rs.getString("EMAIL");
-                    String telf = rs.getString("TELEFONO");
-
-                    System.out.println("DNI = " + dni);
-                    System.out.println("NOMBRE = " + name);
-                    System.out.println("DIRECCION = " + dir);
-                    System.out.println("EMAIL = " + email);
-                    System.out.println("TELEFONO = " + telf);
-                } else {
-                    String email = rs.getString("EMAIL");
-                    String telf = rs.getString("TELEFONO");
-
-                    System.out.println("EMAIL = " + email);
-                    System.out.println("TELEFONO = " + telf);
-                    System.out.println();
-                }
-                lastDNI = dni;
-                System.out.println();
-            }
+            /*rs = st.executeQuery("SELECT * FROM CONTACTOS;");
 
             rs.close();
-            stmt.close();
+            st.close();
             c.close();
+            */
 
-        } catch ( Exception e ) {
-            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
-            System.exit(0);
+    }
+
+    static void createTables() throws Exception {
+        st = c.createStatement();
+
+        st.execute("DROP TABLE IF EXISTS CONTACTOS");
+        st.execute("DROP TABLE IF EXISTS EMAILS");
+        st.execute("DROP TABLE IF EXISTS TELEFONOS");
+
+        // CONTACTOS
+        String sql = "CREATE TABLE CONTACTOS " +
+                "(DNI VARCHAR(9) PRIMARY KEY NOT NULL," +
+                " Nombre VARCHAR(30) NOT NULL, " +
+                " Direccion VARCHAR(30) NOT NULL)";
+        st.execute(sql);
+        // EMAILS
+        sql = "CREATE TABLE EMAILS " +
+                "(DNI VARCHAR(9) NOT NULL," +
+                " Email VARCHAR(50) NOT NULL, " +
+                " FOREIGN KEY(DNI) REFERENCES CONTACTOS (DNI) ON UPDATE CASCADE ON DELETE CASCADE)";
+        st.execute(sql);
+        // TELEFONOS
+        sql = "CREATE TABLE TELEFONOS " +
+                "(DNI VARCHAR(9) NOT NULL," +
+                " Telefonos INT NOT NULL, " +
+                " FOREIGN KEY(DNI) REFERENCES CONTACTOS (DNI) ON UPDATE CASCADE ON DELETE CASCADE)";
+        st.execute(sql);
+    }
+
+    static void insertData() throws Exception {
+        // CONTACTOS
+        st.execute("INSERT INTO CONTACTOS VALUES ('48584159A', 'Messi', 'Barcelona');");
+        st.execute("INSERT INTO CONTACTOS VALUES ('12345678W', 'Jero', 'Mallorca');");
+        st.execute("INSERT INTO CONTACTOS VALUES ('87654321Q', 'Juan Francisco', 'Mallorca');");
+        // EMAILS
+        st.execute("INSERT INTO EMAILS VALUES ('48584159A', 'messi@gmail.com');");
+        st.execute("INSERT INTO EMAILS VALUES ('12345678W', 'jero13@gmail.com');");
+        st.execute("INSERT INTO EMAILS VALUES ('87654321Q', 'jfpinanm@gmail.com');");
+        // TELEFONOS
+        st.execute("INSERT INTO TELEFONOS VALUES ('48584159A', 971020201);");
+        st.execute("INSERT INTO TELEFONOS VALUES ('48584159A', 659010203);");
+        st.execute("INSERT INTO TELEFONOS VALUES ('12345678W', 659040401);");
+        st.execute("INSERT INTO TELEFONOS VALUES ('87654321Q', 671020406);");
+    }
+
+    static void selectAll() throws Exception {
+        ResultSet rs = st.executeQuery( "SELECT DNI, NOMBRE, DIRECCION FROM CONTACTOS ORDER BY DNI DESC;" );
+
+        System.out.println("+----------------+------------------------------+---------------------------------+");
+        while (rs.next()) {
+            String dni = rs.getString("DNI");
+            String name = rs.getString("Nombre");
+            String dir = rs.getString("Direccion");
+
+            System.out.printf("| DNI: %9s | Nombre: %-20s | Direccion: %-20s |\n", dni, name, dir);
         }
-        System.out.println("Table created successfully");
+        System.out.println("+----------------+------------------------------+---------------------------------+");
     }
 }
