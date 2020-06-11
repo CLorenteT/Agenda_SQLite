@@ -33,9 +33,8 @@ public class Main {
                     selectOne(s.next());
                 }
             }
-            else if (action.equalsIgnoreCase("insertar")) {
+            else if (action.equalsIgnoreCase("insertar"))
                 insert();
-            }
             else if (action.equalsIgnoreCase("modificar")) {
                 System.out.println("DNI del contacto: ");
                 String DNI = s.next();
@@ -197,6 +196,38 @@ public class Main {
         String direccion = s.next();
 
         st.executeUpdate("UPDATE CONTACTOS SET Nombre = '" + nombre + "', Direccion = '" + direccion + "' WHERE DNI = '" + DNI + "';");
+        st.execute("DELETE FROM EMAILS WHERE DNI = '" + DNI + "';");
+        st.execute("DELETE FROM TELEFONOS WHERE DNI = '" + DNI + "';");
+
+        System.out.println("Cúantos emails quieres añadir? ");
+        int nEmails = s.nextInt();
+
+        if (nEmails > 0) {
+            for (int i = 0; i < nEmails; i++) {
+                System.out.println("Email: ");
+                String email = s.next();
+                st.execute("INSERT INTO EMAILS VALUES ('" + DNI + "', '" + email + "');");
+            }
+        }
+        else if (nEmails == 0)
+            System.out.println("Emails no añadidos.");
+        else
+            System.out.println("Número de emails no aceptado.");
+
+        System.out.println("Cúantos teléfonos quieres añadir? ");
+        int nTelf = s.nextInt();
+
+        if (nTelf > 0) {
+            for (int i = 0; i < nTelf; i++) {
+                System.out.println("Teléfono: ");
+                int telf = s.nextInt();
+                st.execute("INSERT INTO TELEFONOS VALUES ('" + DNI + "', '" + telf + "');");
+            }
+        }
+        else if (nTelf == 0)
+            System.out.println("Teléfonos no añadidos.");
+        else
+            System.out.println("Número de teléfonos no aceptado.");
     }
 
     private static void delete(String DNI) throws Exception {
@@ -205,6 +236,8 @@ public class Main {
 
         if (conf.equalsIgnoreCase("si")) {
             st.execute("DELETE FROM CONTACTOS WHERE DNI = '" + DNI + "';");
+            st.execute("DELETE FROM EMAILS WHERE DNI = '" + DNI + "';");
+            st.execute("DELETE FROM TELEFONOS WHERE DNI = '" + DNI + "';");
             System.out.println("Contacto eliminado correctamente!");
         }
         else if (conf.equalsIgnoreCase("no"))
